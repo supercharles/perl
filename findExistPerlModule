@@ -1,0 +1,39 @@
+#!/usr/bin/perl -w
+use strict;
+use ExtUtils::Installed;
+
+#use YAML::XS;
+
+my $instmod = ExtUtils::Installed->new();
+
+#my $cmd = 'grep resource::perl::cpan /etc/puppet/modules/devops/manifests/default.pp |awk -F"\'" \'{print $2 }\'';
+my $cmd = 'cat /tmp/PerlInstallModule';
+
+#print $cmd."\n";
+my @input = `$cmd`;
+my %install = map { $_ => '1' } chomp @input;
+
+#print YAML::XS::Dump keys %install;
+
+my %localmodule =
+  map { $_ => $instmod->version($_) || "???"; } $instmod->modules();
+map { print "|" . $_ . "|\n" } keys %localmodule;
+
+print "**** List installed modules \n";
+map {
+    print "|" . $_ . "|\n" && delete $install{$_} if exists $localmodule{$_};
+} keys %install;
+
+#if ( keys %install ) {
+#    print "**** List not needed installed modules \n";
+#    map { print "|" . $_ . "|\n" unless exists $localmodule{$_}; }
+#      keys %install;
+#
+#    print "****Install the modules should be installed but not have installed\n";
+#    die unless system("export PERL_MM_USE_DEFAULT=1");
+#    map {
+#        system(
+#"nice -n 19 ionice -c3  cpanm $_ || nice -n 19 ionice -c3  cpanm --mirror http://mirrors.d.xiaonei.com:8081/CPAN $_||nice -n 19 ionice -c3 cpan $_ "
+#        ) unless exists $localmodule{$_};
+#    } keys %install;
+#}
